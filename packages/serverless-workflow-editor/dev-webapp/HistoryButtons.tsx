@@ -21,6 +21,7 @@ import { Split, SplitItem } from "@patternfly/react-core/dist/js/layouts/Split";
 import { Modal, ModalVariant } from "@patternfly/react-core/dist/js/components/Modal";
 import { Switch } from "@patternfly/react-core/dist/js/components/Switch";
 import "./HistoryButtons.scss";
+import Catalogs from "./Catalogs";
 
 export enum Theme {
   LIGHT,
@@ -58,6 +59,9 @@ export const HistoryButtons = (props: HistoryButtonsProps) => {
           <Button variant="secondary" onClick={props.validate} ouiaId="validate-button">
             Validate
           </Button>
+        </SplitItem>
+        <SplitItem>
+          <Catalogs />
         </SplitItem>
         <SplitItem className="history-buttons__theme-switch">
           <Switch
