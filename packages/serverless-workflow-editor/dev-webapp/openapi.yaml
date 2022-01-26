@@ -65,6 +65,7 @@ paths:
         "200":
           description: OK
     post:
+      operationId: doOperation
       tags:
         - Forms Service
       parameters:

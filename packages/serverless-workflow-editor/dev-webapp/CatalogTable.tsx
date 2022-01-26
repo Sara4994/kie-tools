@@ -11,23 +11,20 @@ import {
 } from "@patternfly/react-core";
 import { Table, TableHeader, TableBody } from "@patternfly/react-table";
 import { CubesIcon } from "@patternfly/react-icons";
-import { getProcessDefinitionList } from "./apis";
-
-interface serviceMeta {
-  name: string;
-  url: string;
-  type: string;
-}
+import { ServiceDefinition } from "./types";
 
 interface IOwnProps {
   handleFormModalToggle: any;
 }
 
+interface ServiceMeta {
+  services: ServiceDefinition[];
+}
 const CatalogTable: React.FC<IOwnProps> = ({ handleFormModalToggle }) => {
   const defaultData = JSON.parse(localStorage.getItem("services") || "[]");
-  const [data, setData] = useState<any>(defaultData);
-  const [isTableModalOpen, setIsTableModalOpen] = useState(false);
-  const columns = ["Name", "Url", "Type", ""];
+  const [data, setData] = useState<ServiceMeta>(defaultData);
+  const [isTableModalOpen, setIsTableModalOpen] = useState<boolean>(false);
+  const columns: string[] = ["Name", "Url", "Type", ""];
   const [rows, setRows] = useState<any>([]);
 
   const switchModal = (): void => {
@@ -38,25 +35,23 @@ const CatalogTable: React.FC<IOwnProps> = ({ handleFormModalToggle }) => {
   const handleTableModalToggle = (): void => {
     setIsTableModalOpen(!isTableModalOpen);
   };
-  console.log("tableModal", isTableModalOpen);
+
   const tempRows: any = [];
 
-  const handleDeleteAction = (service: any): void => {
-    const serviceName: string = service.target.parentNode.parentNode.firstChild.innerText;
-    const tempData: any = { ...data };
+  const handleDeleteAction = (event: any): void => {
+    const serviceName: string = event.target.parentNode.parentNode.firstChild.innerText;
+    const tempData: ServiceMeta = { ...data };
     tempData?.services.splice(
-      tempData?.services.findIndex((element: any) => element.name === serviceName),
+      tempData?.services.findIndex((element: ServiceDefinition) => element.name === serviceName),
       1
     );
     localStorage.setItem("services", JSON.stringify(tempData));
-    console.log("tempData", tempData);
     setData(tempData);
   };
 
-  const getValues = (service: serviceMeta) => {
+  const getValues = (service: ServiceDefinition) => {
     const tempCells = [];
     for (const item in service) {
-      console.log("item", item);
       if (item === "name") {
         const ele = {
           title: service.name,
@@ -93,17 +88,15 @@ const CatalogTable: React.FC<IOwnProps> = ({ handleFormModalToggle }) => {
     return { tempCells };
   };
 
-  const tableContent = (data: any) => {
-    console.log("here tableContent");
+  const tableContent = (data: ServiceMeta): void => {
     if (data && data.services) {
-      data.services.map((service: serviceMeta) => {
+      data.services.map((service: ServiceDefinition) => {
         const retrievedValue: any = getValues(service);
         tempRows.push({
           cells: retrievedValue.tempCells,
         });
       });
     }
-    console.log("tempRows", tempRows);
     if (tempRows.length === 0) {
       const emptyStateRow = [
         {
@@ -124,17 +117,13 @@ const CatalogTable: React.FC<IOwnProps> = ({ handleFormModalToggle }) => {
           ],
         },
       ];
-      console.log("here");
       setRows(emptyStateRow);
     } else {
       setRows(tempRows);
     }
   };
-  console.log("rows", rows);
 
   React.useEffect(() => {
-    // setRows([])
-    getProcessDefinitionList();
     setData(JSON.parse(localStorage.getItem("services") || "[]"));
   }, [isTableModalOpen]);
 

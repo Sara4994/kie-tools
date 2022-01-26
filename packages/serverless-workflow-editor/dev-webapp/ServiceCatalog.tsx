@@ -2,8 +2,8 @@ import React, { useState } from "react";
 import CatalogTable from "./CatalogTable";
 import CatalogForm from "./CatalogForm";
 
-const Catalogs = () => {
-  const [isCatalogForm, setIsCatalogForm] = useState(false);
+const ServiceCatalog = () => {
+  const [isCatalogForm, setIsCatalogForm] = useState<boolean>(false);
   const handleFormModalToggle = (): void => {
     setIsCatalogForm(!isCatalogForm);
   };
@@ -15,4 +15,4 @@ const Catalogs = () => {
   );
 };
 
-export default Catalogs;
+export default ServiceCatalog;

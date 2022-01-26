@@ -19,6 +19,13 @@ interface serviceMeta {
   type: string;
 }
 
+enum validate {
+  default = "default",
+  success = "success",
+  warning = "warning",
+  error = "error",
+}
+
 interface IOwnProps {
   handleFormModalToggle: any;
   isCatalogForm: boolean;
@@ -27,12 +34,8 @@ const CatalogForm: React.FC<IOwnProps> = ({ isCatalogForm, handleFormModalToggle
   const [selected, setSelected] = useState<any>("");
   const [serviceName, setServiceName] = useState("");
   const [serviceurl, setServiceUrl] = useState("");
-  const [validateName, setValidateName] = useState<any>("default");
-  const [validateUrl, setValidateUrl] = useState<any>("default");
-
-  const nameInvalidText = "Enter a valid name";
-  const urlInvalidText = "Enter a valid url";
-  const helperText = "enter text";
+  const [validateName, setValidateName] = useState<validate>(validate.default);
+  const [validateUrl, setValidateUrl] = useState<validate>(validate.default);
 
   const resetForm = (): void => {
     setSelected("");
@@ -55,9 +58,9 @@ const CatalogForm: React.FC<IOwnProps> = ({ isCatalogForm, handleFormModalToggle
 
   const handleCreateService = (): void => {
     if (serviceName.length === 0 || typeof serviceName === "number") {
-      setValidateName("error");
+      setValidateName(validate.error);
     } else if (serviceurl.length === 0 || typeof serviceurl === "number") {
-      setValidateUrl("error");
+      setValidateUrl(validate.error);
     } else {
       if (selected.length > 0) {
         const tempObj: serviceMeta = {
@@ -65,8 +68,8 @@ const CatalogForm: React.FC<IOwnProps> = ({ isCatalogForm, handleFormModalToggle
           url: serviceurl,
           type: selected,
         };
-        setValidateName("default");
-        setValidateUrl("default");
+        setValidateName(validate.default);
+        setValidateUrl(validate.default);
 
         if (localStorage.getItem("services") === null) {
           const catalog: any = {};
