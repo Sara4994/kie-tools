@@ -21,6 +21,7 @@ const common = require("@kie-tools-core/webpack-base/webpack.common.config");
 const patternflyBase = require("@kie-tools-core/patternfly-base");
 const buildEnv = require("@kie-tools/build-env");
 const MonacoWebpackPlugin = require("monaco-editor-webpack-plugin");
+const NodePolyfillPlugin = require("node-polyfill-webpack-plugin");
 const webpack = require("webpack");
 
 module.exports = (env) =>
@@ -57,6 +58,7 @@ module.exports = (env) =>
       new webpack.ProvidePlugin({
         mermaid: "mermaid",
       }),
+      new NodePolyfillPlugin(),
     ],
     module: {
       rules: [
