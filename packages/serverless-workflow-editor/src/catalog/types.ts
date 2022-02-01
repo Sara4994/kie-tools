@@ -2,11 +2,16 @@ export interface FunctionDefinition {
   name: string;
   operation: string;
   arguments: Object;
-  type: string;
+  type: ServiceType;
+}
+
+export enum ServiceType {
+  rest = "rest",
+  graphql = "graphql",
 }
 
 export interface ServiceDefinition {
   name: string;
-  url: string;
-  type: string;
+  path: string;
+  type: ServiceType;
 }

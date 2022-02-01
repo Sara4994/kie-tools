@@ -20,8 +20,9 @@ import { Button } from "@patternfly/react-core/dist/js/components/Button";
 import { Split, SplitItem } from "@patternfly/react-core/dist/js/layouts/Split";
 import { Modal, ModalVariant } from "@patternfly/react-core/dist/js/components/Modal";
 import { Switch } from "@patternfly/react-core/dist/js/components/Switch";
-import FunctionCatalog from "./FunctionCatalog";
 import "./HistoryButtons.scss";
+import { CatalogExplorer } from "../src";
+import { getFunctionDefinitionList, getServiceDefinitionList } from "./apis";
 
 export enum Theme {
   LIGHT,
@@ -38,6 +39,11 @@ interface HistoryButtonsProps {
 
 export const HistoryButtons = (props: HistoryButtonsProps) => {
   const [theme, setTheme] = useState<Theme>(Theme.LIGHT);
+  const [displayMenu, setDisplayMenu] = useState<boolean>(false);
+
+  const handleCatalogExplorer = (): void => {
+    setDisplayMenu(!displayMenu);
+  };
 
   return (
     <div className="history-buttons ignore-onclickoutside">
@@ -61,7 +67,15 @@ export const HistoryButtons = (props: HistoryButtonsProps) => {
           </Button>
         </SplitItem>
         <SplitItem>
-          <FunctionCatalog />
+          <Button variant="primary" onClick={handleCatalogExplorer} ouiaId="catalog-button">
+            Catalog Explorer
+          </Button>
+          {displayMenu && (
+            <CatalogExplorer
+              getFunctionDefinitionList={getFunctionDefinitionList}
+              getServiceDefinitionList={getServiceDefinitionList}
+            />
+          )}
         </SplitItem>
         <SplitItem className="history-buttons__theme-switch">
           <Switch

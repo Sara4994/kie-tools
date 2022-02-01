@@ -15,11 +15,21 @@
  */
 
 import SwaggerParser from "@apidevtools/swagger-parser";
-import { FunctionDefinition } from "./types";
+import { FunctionDefinition, ServiceDefinition, ServiceType } from "../src";
+
+export const getServiceDefinitionList = (): Promise<ServiceDefinition[]> => {
+  return Promise.resolve([
+    {
+      name: "openapi",
+      path: "./openapi.yaml",
+      type: ServiceType.rest,
+    },
+  ]);
+};
 
 export const getFunctionDefinitionList = (file: string): Promise<FunctionDefinition[]> => {
   return new Promise((resolve, reject) => {
-    SwaggerParser.parse(`./${file}`)
+    SwaggerParser.parse(`${file}`)
       .then((response) => {
         const functionDefinitionObjs: any = [];
         const paths = response.paths;
@@ -58,7 +68,7 @@ export const createFunctionDefinitionList = (
       funcArguments = components?.schemas[`${ref}`];
 
       functionDefinition.arguments = funcArguments.properties || {};
-      functionDefinition.type = "rest";
+      functionDefinition.type = ServiceType.rest;
     }
     functionDefinitionList.push(functionDefinition);
   });
