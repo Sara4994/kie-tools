@@ -1,7 +1,7 @@
 export interface FunctionDefinition {
   name: string;
   operation: string;
-  arguments: Object;
+  arguments: Record<string, any>;
   type: ServiceType;
 }
 

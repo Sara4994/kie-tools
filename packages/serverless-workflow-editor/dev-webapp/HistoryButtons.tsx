@@ -74,6 +74,7 @@ export const HistoryButtons = (props: HistoryButtonsProps) => {
             <CatalogExplorer
               getFunctionDefinitionList={getFunctionDefinitionList}
               getServiceDefinitionList={getServiceDefinitionList}
+              handleCatalogExplorer={handleCatalogExplorer}
             />
           )}
         </SplitItem>

@@ -20,16 +20,26 @@ import { FunctionDefinition, ServiceDefinition, ServiceType } from "../src";
 export const getServiceDefinitionList = (): Promise<ServiceDefinition[]> => {
   return Promise.resolve([
     {
-      name: "openapi",
-      path: "./openapi.yaml",
+      name: "api",
+      path: "./specs/openapi.yaml",
+      type: ServiceType.rest,
+    },
+    {
+      name: "multiplication",
+      path: "./specs/multiplication.yaml",
+      type: ServiceType.rest,
+    },
+    {
+      name: "subtraction",
+      path: "./specs/subtraction.yaml",
       type: ServiceType.rest,
     },
   ]);
 };
 
-export const getFunctionDefinitionList = (file: string): Promise<FunctionDefinition[]> => {
+export const getFunctionDefinitionList = (path: string): Promise<FunctionDefinition[]> => {
   return new Promise((resolve, reject) => {
-    SwaggerParser.parse(`${file}`)
+    SwaggerParser.parse(`${path}`)
       .then((response) => {
         const functionDefinitionObjs: any = [];
         const paths = response.paths;
@@ -41,7 +51,7 @@ export const getFunctionDefinitionList = (file: string): Promise<FunctionDefinit
           }
         });
 
-        resolve(createFunctionDefinitionList(functionDefinitionObjs, components, file));
+        resolve(createFunctionDefinitionList(functionDefinitionObjs, components, path));
       })
       .catch((err) => reject(err));
   });
@@ -50,20 +60,24 @@ export const getFunctionDefinitionList = (file: string): Promise<FunctionDefinit
 export const createFunctionDefinitionList = (
   functionDefinitionObjs: any,
   components: any,
-  file: string
+  path: string
 ): FunctionDefinition[] => {
   const functionDefinitionList: FunctionDefinition[] = [] as FunctionDefinition[];
 
   functionDefinitionObjs.forEach((processDefObj: any) => {
     const functionDefinition: FunctionDefinition = {} as FunctionDefinition;
     const obj: any = processDefObj[Object.keys(processDefObj)[0]];
-    functionDefinition.name = obj.hasOwnProperty("operationId") ? obj.operationId : Object.keys(processDefObj)[0];
+    const functionName: string = Object.keys(processDefObj)[0].replace(/^\/+/, "");
+
+    functionDefinition.name = obj.hasOwnProperty("operationId") ? obj.operationId : functionName;
     functionDefinition.operation = obj.hasOwnProperty("operationId")
-      ? `specs/${file}#${obj.operationId}`
-      : `specs/${file}#${Object.keys(processDefObj)[0]}`;
+      ? `${path}#${obj.operationId}`
+      : `${path}#${functionName}`;
     const content = (obj?.requestBody || {}).content;
     const ref = content && content[`${Object.keys(content)[0]}`]["schema"]["$ref"]?.split("/").pop();
+
     let funcArguments: any = {};
+
     if (ref) {
       funcArguments = components?.schemas[`${ref}`];
 
