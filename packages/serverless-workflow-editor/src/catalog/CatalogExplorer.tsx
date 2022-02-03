@@ -27,9 +27,13 @@ import {
   AccordionContent,
   MenuItemAction,
   Tooltip,
+  Text,
+  TextVariants,
+  TextContent,
 } from "@patternfly/react-core";
-import { FunctionDefinition, ServiceDefinition } from "./types";
+import { FunctionDefinition, ServiceDefinition, ServiceType } from "./types";
 import { TimesIcon } from "@patternfly/react-icons";
+import { SiOpenapiinitiative, SiGraphql } from "react-icons/si";
 
 interface IOwnProps {
   getFunctionDefinitionList: (path: string) => Promise<FunctionDefinition[]>;
@@ -77,6 +81,28 @@ export const CatalogExplorer: React.FC<IOwnProps> = ({
     }
   };
 
+  const renderTitle = (type: ServiceType, name: string): JSX.Element => {
+    if (type === "rest") {
+      return (
+        <React.Fragment>
+          <span style={{ marginRight: "8px" }}>
+            <SiOpenapiinitiative />
+          </span>
+          <span>{name}</span>
+        </React.Fragment>
+      );
+    } else {
+      return (
+        <React.Fragment>
+          <span style={{ marginRight: "8px" }}>
+            <SiGraphql />
+          </span>
+          <span>{name}</span>
+        </React.Fragment>
+      );
+    }
+  };
+
   const renderAccordionItem = (): JSX.Element => {
     if (serviceList.length === 0) {
       return (
@@ -97,7 +123,7 @@ export const CatalogExplorer: React.FC<IOwnProps> = ({
                   isExpanded={expanded === service.name}
                   id={service.name}
                 >
-                  {service.name}
+                  {renderTitle(service.type, service.name)}
                 </AccordionToggle>
                 <AccordionContent
                   id={service.name}
