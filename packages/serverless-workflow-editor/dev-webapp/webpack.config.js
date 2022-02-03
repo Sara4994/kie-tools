@@ -90,14 +90,17 @@ module.exports = (env) =>
     },
     devServer: {
       historyApiFallback: true,
-      disableHostCheck: true,
-      watchContentBase: true,
-      contentBase: path.join(__dirname),
+      allowedHosts: "all",
+      static: {
+        directory: path.join(__dirname),
+        watch: true,
+      },
       compress: true,
       port: buildEnv.serverlessWorkflowEditor.dev.port,
       open: false,
-      inline: true,
       hot: true,
-      overlay: true,
+      client: {
+        overlay: true,
+      },
     },
   });
