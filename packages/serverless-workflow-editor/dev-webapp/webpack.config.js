@@ -32,6 +32,9 @@ module.exports = (env) =>
     output: {
       path: path.resolve("../dist-dev"),
     },
+    externals: {
+      vscode: "commonjs vscode",
+    },
     plugins: [
       new CopyPlugin({
         patterns: [

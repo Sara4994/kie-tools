@@ -49,6 +49,7 @@ export const App = () => {
   };
 
   const container = useRef<HTMLDivElement | null>(null);
+  console.log("test", container, editor);
 
   return (
     <Page>

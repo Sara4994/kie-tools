@@ -16,6 +16,8 @@
   "dependencies": {
     "@kie-tools-core/editor": "0.0.0",
     "@kie-tools-core/patternfly-base": "0.0.0",
+    "@kie-tools-core/vscode-extension": "^0.0.0",
+    "ajv": "^8.10.0",
     "mermaid": "^8.13.4",
     "monaco-editor": "^0.23.0",
     "monaco-yaml": "^3.2.1"
@@ -40,6 +42,9 @@
     "@types/mermaid": "^8.2.7",
     "monaco-editor-webpack-plugin": "^3.0.0",
     "vscode-json-languageservice": "^4.1.0"
+  },
+  "engines": {
+    "vscode": "^1.46.0"
   },
   "babel": {
     "presets": [

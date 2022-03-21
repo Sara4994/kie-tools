@@ -54,6 +54,7 @@ export class DefaultSwfMonacoEditorController implements SwfMonacoEditorApi {
     private readonly language: string,
     private readonly operatingSystem: OperatingSystem | undefined
   ) {
+    console.log("Default", content);
     this.model = editor.createModel(content, this.language);
     this.model.onDidChangeContent((event) => {
       if (!event.isUndoing && !event.isRedoing) {

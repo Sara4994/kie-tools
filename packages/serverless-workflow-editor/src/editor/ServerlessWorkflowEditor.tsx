@@ -24,7 +24,7 @@ import {
 } from "@patternfly/react-core/dist/js/components/Drawer";
 import { KogitoEdit } from "@kie-tools-core/workspace/dist/api";
 import { Notification } from "@kie-tools-core/notifications/dist/api";
-import { Specification } from "@severlessworkflow/sdk-typescript";
+import { WorkflowValidator, Specification } from "@severlessworkflow/sdk-typescript";
 import { MermaidDiagram } from "../diagram";
 import svgPanZoom from "svg-pan-zoom";
 import mermaid from "mermaid";
@@ -32,6 +32,7 @@ import { SwfMonacoEditorApi } from "../monaco/SwfMonacoEditorApi";
 import { SwfMonacoEditor } from "../monaco/SwfMonacoEditor";
 import { MonacoEditorOperation } from "../monaco/SwfMonacoEditorApi";
 import { EditorTheme, StateControlCommand } from "@kie-tools-core/editor/dist/api";
+import Ajv from "ajv";
 
 interface Props {
   /**
@@ -72,6 +73,7 @@ const RefForwardingServerlessWorkflowEditor: React.ForwardRefRenderFunction<
   ServerlessWorkflowEditorRef | undefined,
   Props
 > = (props, forwardedRef) => {
+  const ajv = new Ajv();
   const [initialContent, setInitialContent] = useState({
     originalContent: "",
     path: "",
@@ -79,6 +81,35 @@ const RefForwardingServerlessWorkflowEditor: React.ForwardRefRenderFunction<
   const [diagramOutOfSync, setDiagramOutOfSync] = useState<boolean>(false);
   const svgContainer = useRef<HTMLDivElement>(null);
   const swfMonacoEditorRef = useRef<SwfMonacoEditorApi>(null);
+  // const validate = ajv.compile(Specification.Workflow);
+
+  const debounce = (func: any, wait: any) => {
+    let timeout: any;
+
+    return function executedFunction(...args: any) {
+      const later = () => {
+        clearTimeout(timeout);
+        func(...args);
+      };
+
+      clearTimeout(timeout);
+      timeout = setTimeout(later, wait);
+    };
+  };
+
+  const validateWorkFlow = () => {
+    const workflowValidator: WorkflowValidator = new WorkflowValidator(
+      Specification.Workflow.fromSource(JSON.stringify(initialContent.originalContent))
+    );
+    // const valid = validate(JSON.stringify(initialContent.originalContent));
+    if (!workflowValidator.isValid) {
+      workflowValidator.errors.forEach((error) => {
+        props.setNotifications(initialContent.path, [
+          { path: initialContent.path, severity: "ERROR", message: `Testing1 - ${error.message}`, type: "PROBLEM" },
+        ]);
+      });
+    }
+  };
 
   useImperativeHandle(
     forwardedRef,
@@ -134,7 +165,7 @@ const RefForwardingServerlessWorkflowEditor: React.ForwardRefRenderFunction<
       try {
         const workflow: Specification.Workflow = Specification.Workflow.fromSource(newContent);
         const mermaidSourceCode = workflow.states ? new MermaidDiagram(workflow).sourceCode() : "";
-
+        validateWorkFlow();
         if (mermaidSourceCode?.length > 0) {
           svgContainer.current!.innerHTML = mermaidSourceCode;
           svgContainer.current!.removeAttribute("data-processed");
@@ -145,11 +176,17 @@ const RefForwardingServerlessWorkflowEditor: React.ForwardRefRenderFunction<
           setDiagramOutOfSync(false);
         } else {
           svgContainer.current!.innerHTML = "Create a workflow to see its preview here.";
+          // vscode.window.showInformationMessage("Test show infor message")
           setDiagramOutOfSync(true);
         }
       } catch (e) {
         console.error(e);
+        // debounce(() => {
+        props.setNotifications(initialContent.path, [
+          { path: initialContent.path, severity: "ERROR", message: `Testing2 - ${e.message}`, type: "PROBLEM" },
+        ]);
         setDiagramOutOfSync(true);
+        // },5000);
       }
     },
     [props]
@@ -171,7 +208,7 @@ const RefForwardingServerlessWorkflowEditor: React.ForwardRefRenderFunction<
       </DrawerPanelBody>
     </DrawerPanelContent>
   );
-
+  console.log("initialContent", initialContent);
   return (
     <Drawer isExpanded={true} isInline={true}>
       <DrawerContent panelContent={panelContent}>

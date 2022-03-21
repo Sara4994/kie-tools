@@ -35,7 +35,8 @@ const RefForwardingSwfMonacoEditor: React.ForwardRefRenderFunction<SwfMonacoEdit
 ) => {
   const container = useRef<HTMLDivElement>(null);
   const envelopeContext = useKogitoEditorEnvelopeContext();
-  const [theme] = useSharedValue(envelopeContext.channelApi.shared.kogitoEditor_theme);
+  console.log("test", envelopeContext);
+  const [theme] = useSharedValue(envelopeContext?.channelApi?.shared.kogitoEditor_theme);
 
   const controller: SwfMonacoEditorApi = useMemo<SwfMonacoEditorApi>(() => {
     if (fileName.endsWith(".sw.json")) {
@@ -69,7 +70,7 @@ const RefForwardingSwfMonacoEditor: React.ForwardRefRenderFunction<SwfMonacoEdit
   }, [content, fileName, controller, theme]);
 
   useImperativeHandle(forwardedRef, () => controller, [controller]);
-
+  console.log("container", container);
   return <div style={{ height: "100%" }} ref={container} />;
 };
 
