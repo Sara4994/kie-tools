@@ -24,7 +24,7 @@ import {
 } from "@patternfly/react-core/dist/js/components/Drawer";
 import { KogitoEdit } from "@kie-tools-core/workspace/dist/api";
 import { Notification } from "@kie-tools-core/notifications/dist/api";
-import { WorkflowValidator, Specification } from "@severlessworkflow/sdk-typescript";
+import { WorkflowValidator, Specification, validators } from "@severlessworkflow/sdk-typescript";
 import { MermaidDiagram } from "../diagram";
 import svgPanZoom from "svg-pan-zoom";
 import mermaid from "mermaid";
@@ -32,7 +32,7 @@ import { SwfMonacoEditorApi } from "../monaco/SwfMonacoEditorApi";
 import { SwfMonacoEditor } from "../monaco/SwfMonacoEditor";
 import { MonacoEditorOperation } from "../monaco/SwfMonacoEditorApi";
 import { EditorTheme, StateControlCommand } from "@kie-tools-core/editor/dist/api";
-import Ajv from "ajv";
+import Ajv, { ValidateFunction } from "ajv";
 
 interface Props {
   /**
@@ -97,17 +97,23 @@ const RefForwardingServerlessWorkflowEditor: React.ForwardRefRenderFunction<
     };
   };
 
-  const validateWorkFlow = () => {
+  const validateWorkFlow = (workflow: any): any => {
     const workflowValidator: WorkflowValidator = new WorkflowValidator(
-      Specification.Workflow.fromSource(JSON.stringify(initialContent.originalContent))
+      Specification.Workflow.fromSource(JSON.stringify(workflow))
     );
     // const valid = validate(JSON.stringify(initialContent.originalContent));
+    const injectionState: Specification.Injectstate = workflow;
+    const injectionStateValidator: any = validators.get("Injectstate");
+    if (!injectionStateValidator(injectionState)) {
+      injectionStateValidator.errors.forEach((error: any) => console.error(error.message));
+    }
     if (!workflowValidator.isValid) {
-      workflowValidator.errors.forEach((error) => {
-        props.setNotifications(initialContent.path, [
-          { path: initialContent.path, severity: "ERROR", message: `Testing1 - ${error.message}`, type: "PROBLEM" },
-        ]);
-      });
+      // workflowValidator.errors.forEach((error) => {
+      //   props.setNotifications(initialContent.path, [
+      //     { path: initialContent.path, severity: "ERROR", message: `Testing1 - ${error.message}`, type: "PROBLEM" },
+      //   ]);
+      // });
+      return workflowValidator.errors;
     }
   };
 
@@ -165,7 +171,16 @@ const RefForwardingServerlessWorkflowEditor: React.ForwardRefRenderFunction<
       try {
         const workflow: Specification.Workflow = Specification.Workflow.fromSource(newContent);
         const mermaidSourceCode = workflow.states ? new MermaidDiagram(workflow).sourceCode() : "";
-        validateWorkFlow();
+        const validationResults = validateWorkFlow(workflow);
+        const notifications: Notification[] =
+          validationResults &&
+          validationResults.map((validationResult: any) => ({
+            type: "PROBLEM",
+            path: "",
+            severity: validationResult.severity,
+            message: `${validationResult.message}`,
+          }));
+        props.setNotifications(initialContent.path, notifications);
         if (mermaidSourceCode?.length > 0) {
           svgContainer.current!.innerHTML = mermaidSourceCode;
           svgContainer.current!.removeAttribute("data-processed");
@@ -182,9 +197,6 @@ const RefForwardingServerlessWorkflowEditor: React.ForwardRefRenderFunction<
       } catch (e) {
         console.error(e);
         // debounce(() => {
-        props.setNotifications(initialContent.path, [
-          { path: initialContent.path, severity: "ERROR", message: `Testing2 - ${e.message}`, type: "PROBLEM" },
-        ]);
         setDiagramOutOfSync(true);
         // },5000);
       }
