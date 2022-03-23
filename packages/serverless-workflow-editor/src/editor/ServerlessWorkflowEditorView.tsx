@@ -63,6 +63,9 @@ export class ServerlessWorkflowEditorView implements Editor {
         setNotifications={(path, notifications) =>
           this.envelopeContext.channelApi.notifications.kogitoNotifications_setNotifications.send(path, notifications)
         }
+        removeNotifications={(path) =>
+          this.envelopeContext.channelApi.notifications.kogitoNotifications_removeNotifications.send(path)
+        }
       />
     );
   }
