@@ -84,6 +84,7 @@ const RefForwardingSwfMonacoEditor: React.ForwardRefRenderFunction<SwfMonacoEdit
 
   useImperativeHandle(forwardedRef, () => controller, [controller]);
   console.log("container", container);
+  // setErrors(controller.getValidationMarkers());
   return <div style={{ height: "100%" }} ref={container} />;
 };
 

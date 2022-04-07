@@ -20,6 +20,7 @@ import { initJsonSchema } from "./augmentation/language/json";
 import { initYamlSchema } from "./augmentation/language/yaml";
 import { OperatingSystem } from "@kie-tools-core/operating-system";
 import { EditorTheme } from "@kie-tools-core/editor/dist/api";
+import { debounce } from "underscore";
 
 initJsonSchema();
 initYamlSchema();
@@ -30,6 +31,7 @@ export interface SwfMonacoEditorApi {
   redo: () => void;
   getContent: () => string;
   setTheme: (theme: EditorTheme) => void;
+  getValidationMarkers: () => void;
 }
 
 export enum MonacoEditorOperation {
@@ -60,32 +62,43 @@ export class DefaultSwfMonacoEditorController implements SwfMonacoEditorApi {
     this.model.onDidChangeContent((event) => {
       if (!event.isUndoing && !event.isRedoing) {
         this.editor?.pushUndoStop();
-        this.setErrors(editor.getModelMarkers({}));
-        this.onContentChange(this.model.getValue(), MonacoEditorOperation.EDIT);
+        onContentChange(this.model.getValue(), MonacoEditorOperation.EDIT);
         console.log("myCheck", editor.getModelMarkers({}), this.model.getValue());
       }
+    });
+    editor.onDidChangeMarkers(() => {
+      this.setErrors(this.getValidationMarkers());
     });
   }
 
   public redo(): void {
     this.editor?.focus();
     this.editor?.trigger("editor", "redo", null);
-    this.setErrors(this.getValidationMarkers());
   }
 
   public undo(): void {
     this.editor?.focus();
     this.editor?.trigger("editor", "undo", null);
-    this.setErrors(this.getValidationMarkers());
   }
 
   public setTheme(theme: EditorTheme): void {
     editor.setTheme(this.getMonacoThemeByEditorTheme(theme));
   }
 
-  public getValidationMarkers(): editor.IMarker[] {
+  public getValidationMarkers = (): editor.IMarker[] => {
     return editor.getModelMarkers({});
-  }
+  };
+
+  public debounce = (cb: any, delay: any) => {
+    let timeout: any;
+
+    return (...args: any) => {
+      clearTimeout(timeout);
+      timeout = setTimeout(() => {
+        cb(...args);
+      }, delay);
+    };
+  };
 
   public show(container: HTMLDivElement, theme: EditorTheme): editor.IStandaloneCodeEditor {
     if (!container) {
@@ -119,6 +132,7 @@ export class DefaultSwfMonacoEditorController implements SwfMonacoEditorApi {
         this.onContentChange(this.model.getValue(), MonacoEditorOperation.REDO);
       });
     }
+    // this.setErrors(this.getValidationMarkers());
 
     return this.editor;
   }
