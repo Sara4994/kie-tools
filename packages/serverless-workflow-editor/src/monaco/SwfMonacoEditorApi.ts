@@ -55,7 +55,7 @@ export class DefaultSwfMonacoEditorController implements SwfMonacoEditorApi {
     private readonly onContentChange: (content: string, operation: MonacoEditorOperation) => void,
     private readonly language: string,
     private readonly operatingSystem: OperatingSystem | undefined,
-    private readonly setErrors: (errors: any) => void
+    private readonly setValidationErrors: (errors: editor.IMarker[]) => void
   ) {
     console.log("Default", content);
     this.model = editor.createModel(content, this.language);
@@ -67,7 +67,7 @@ export class DefaultSwfMonacoEditorController implements SwfMonacoEditorApi {
       }
     });
     editor.onDidChangeMarkers(() => {
-      this.setErrors(this.getValidationMarkers());
+      this.setValidationErrors(this.getValidationMarkers());
     });
   }
 
@@ -87,17 +87,6 @@ export class DefaultSwfMonacoEditorController implements SwfMonacoEditorApi {
 
   public getValidationMarkers = (): editor.IMarker[] => {
     return editor.getModelMarkers({});
-  };
-
-  public debounce = (cb: any, delay: any) => {
-    let timeout: any;
-
-    return (...args: any) => {
-      clearTimeout(timeout);
-      timeout = setTimeout(() => {
-        cb(...args);
-      }, delay);
-    };
   };
 
   public show(container: HTMLDivElement, theme: EditorTheme): editor.IStandaloneCodeEditor {

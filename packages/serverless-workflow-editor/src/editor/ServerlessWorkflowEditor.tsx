@@ -123,7 +123,7 @@ const RefForwardingServerlessWorkflowEditor: React.ForwardRefRenderFunction<
     }
   };
 
-  const setErrors = (errors: any) => {
+  const setValidationErrors = (errors: any) => {
     if (!initialContent) {
       return;
     }
@@ -252,7 +252,7 @@ const RefForwardingServerlessWorkflowEditor: React.ForwardRefRenderFunction<
               content={initialContent.originalContent}
               fileName={initialContent.path}
               onContentChange={onContentChanged}
-              setErrors={setErrors}
+              setValidationErrors={setValidationErrors}
               ref={swfMonacoEditorRef}
             />
           )}

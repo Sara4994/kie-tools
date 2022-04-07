@@ -22,16 +22,17 @@ import { initJsonCodeLenses } from "./augmentation/codeLenses";
 import { initAugmentationCommands } from "./augmentation/commands";
 import { useKogitoEditorEnvelopeContext } from "@kie-tools-core/editor/dist/api";
 import { useSharedValue } from "@kie-tools-core/envelope-bus/src/hooks";
+import { editor } from "monaco-editor/esm/vs/editor/editor.api";
 
 interface Props {
   content: string;
   fileName: string;
   onContentChange: (content: string) => void;
-  setErrors: any;
+  setValidationErrors: (errors: editor.IMarker[]) => void;
 }
 
 const RefForwardingSwfMonacoEditor: React.ForwardRefRenderFunction<SwfMonacoEditorApi | undefined, Props> = (
-  { content, fileName, onContentChange, setErrors },
+  { content, fileName, onContentChange, setValidationErrors },
   forwardedRef
 ) => {
   const container = useRef<HTMLDivElement>(null);
@@ -46,7 +47,7 @@ const RefForwardingSwfMonacoEditor: React.ForwardRefRenderFunction<SwfMonacoEdit
         onContentChange,
         "json",
         envelopeContext.operatingSystem,
-        setErrors
+        setValidationErrors
       );
     }
     if (fileName.endsWith(".sw.yaml") || fileName.endsWith(".sw.yml")) {
@@ -55,7 +56,7 @@ const RefForwardingSwfMonacoEditor: React.ForwardRefRenderFunction<SwfMonacoEdit
         onContentChange,
         "yaml",
         envelopeContext.operatingSystem,
-        setErrors
+        setValidationErrors
       );
     }
 
