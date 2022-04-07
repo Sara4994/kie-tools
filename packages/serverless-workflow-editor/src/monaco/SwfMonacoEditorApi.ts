@@ -52,14 +52,17 @@ export class DefaultSwfMonacoEditorController implements SwfMonacoEditorApi {
     content: string,
     private readonly onContentChange: (content: string, operation: MonacoEditorOperation) => void,
     private readonly language: string,
-    private readonly operatingSystem: OperatingSystem | undefined
+    private readonly operatingSystem: OperatingSystem | undefined,
+    private readonly setErrors: (errors: any) => void
   ) {
     console.log("Default", content);
     this.model = editor.createModel(content, this.language);
     this.model.onDidChangeContent((event) => {
       if (!event.isUndoing && !event.isRedoing) {
         this.editor?.pushUndoStop();
-        onContentChange(this.model.getValue(), MonacoEditorOperation.EDIT);
+        this.setErrors(editor.getModelMarkers({}));
+        this.onContentChange(this.model.getValue(), MonacoEditorOperation.EDIT);
+        console.log("myCheck", editor.getModelMarkers({}), this.model.getValue());
       }
     });
   }
@@ -67,15 +70,21 @@ export class DefaultSwfMonacoEditorController implements SwfMonacoEditorApi {
   public redo(): void {
     this.editor?.focus();
     this.editor?.trigger("editor", "redo", null);
+    this.setErrors(this.getValidationMarkers());
   }
 
   public undo(): void {
     this.editor?.focus();
     this.editor?.trigger("editor", "undo", null);
+    this.setErrors(this.getValidationMarkers());
   }
 
   public setTheme(theme: EditorTheme): void {
     editor.setTheme(this.getMonacoThemeByEditorTheme(theme));
+  }
+
+  public getValidationMarkers(): editor.IMarker[] {
+    return editor.getModelMarkers({});
   }
 
   public show(container: HTMLDivElement, theme: EditorTheme): editor.IStandaloneCodeEditor {

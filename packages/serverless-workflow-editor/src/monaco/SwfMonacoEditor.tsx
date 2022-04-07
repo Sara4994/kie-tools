@@ -27,10 +27,11 @@ interface Props {
   content: string;
   fileName: string;
   onContentChange: (content: string) => void;
+  setErrors: any;
 }
 
 const RefForwardingSwfMonacoEditor: React.ForwardRefRenderFunction<SwfMonacoEditorApi | undefined, Props> = (
-  { content, fileName, onContentChange },
+  { content, fileName, onContentChange, setErrors },
   forwardedRef
 ) => {
   const container = useRef<HTMLDivElement>(null);
@@ -40,10 +41,22 @@ const RefForwardingSwfMonacoEditor: React.ForwardRefRenderFunction<SwfMonacoEdit
 
   const controller: SwfMonacoEditorApi = useMemo<SwfMonacoEditorApi>(() => {
     if (fileName.endsWith(".sw.json")) {
-      return new DefaultSwfMonacoEditorController(content, onContentChange, "json", envelopeContext.operatingSystem);
+      return new DefaultSwfMonacoEditorController(
+        content,
+        onContentChange,
+        "json",
+        envelopeContext.operatingSystem,
+        setErrors
+      );
     }
     if (fileName.endsWith(".sw.yaml") || fileName.endsWith(".sw.yml")) {
-      return new DefaultSwfMonacoEditorController(content, onContentChange, "yaml", envelopeContext.operatingSystem);
+      return new DefaultSwfMonacoEditorController(
+        content,
+        onContentChange,
+        "yaml",
+        envelopeContext.operatingSystem,
+        setErrors
+      );
     }
 
     throw new Error(`Unsupported extension '${fileName}'`);

@@ -102,22 +102,47 @@ const RefForwardingServerlessWorkflowEditor: React.ForwardRefRenderFunction<
   };
 
   const validateWorkFlow = (workflow: Specification.Workflow): any => {
-    console.log("workflow", workflow);
-    initialContent && props.removeNotifications(initialContent.path);
-    const workflowValidator: WorkflowValidator = new WorkflowValidator(workflow);
-    if (!workflowValidator.isValid) {
-      if (initialContent) {
-        console.log("errors", workflowValidator?.errors);
-        const notifications: Notification[] = workflowValidator?.errors.map((validationResult: any) => ({
-          type: "PROBLEM",
-          path: initialContent.path,
-          severity: validationResult.severity,
-          message: `${validationResult.message}`,
-        }));
-
-        props.setNotifications(initialContent.path, notifications);
-      }
+    if (!initialContent) {
+      return;
     }
+    console.log("test-workflow", workflow);
+    const workflowValidator: WorkflowValidator = new WorkflowValidator(workflow);
+    console.log("valid", workflowValidator.isValid);
+    if (!workflowValidator.isValid) {
+      console.log("errors", workflowValidator?.errors);
+      // const notifications: Notification[] = workflowValidator?.errors.map((validationResult: any) => ({
+      //   type: "PROBLEM",
+      //   path: initialContent.path,
+      //   severity: "ERROR",
+      //   message: `${validationResult.message}`,
+      // }));
+      // console.log('notifications', notifications)
+      // props.setNotifications(initialContent.path, notifications);
+    } else {
+      props.removeNotifications(initialContent.path);
+    }
+  };
+
+  const setErrors = (errors: any) => {
+    if (!initialContent) {
+      return;
+    }
+    console.log("check", errors);
+    // props.removeNotifications(initialContent.path);
+    const notifications: Notification[] = errors.map((validationResult: any) => ({
+      type: "PROBLEM",
+      path: initialContent.path,
+      severity: "ERROR",
+      message: `${validationResult.message}`,
+      position: {
+        startLineNumber: validationResult.startLineNumber,
+        startColumn: validationResult.startColumn,
+        endLineNumber: validationResult.endLineNumber,
+        endColumn: validationResult.endColumn,
+      },
+    }));
+    console.log("notifications", notifications);
+    props.setNotifications(initialContent.path, notifications);
   };
 
   useImperativeHandle(
@@ -227,6 +252,7 @@ const RefForwardingServerlessWorkflowEditor: React.ForwardRefRenderFunction<
               content={initialContent.originalContent}
               fileName={initialContent.path}
               onContentChange={onContentChanged}
+              setErrors={setErrors}
               ref={swfMonacoEditorRef}
             />
           )}
