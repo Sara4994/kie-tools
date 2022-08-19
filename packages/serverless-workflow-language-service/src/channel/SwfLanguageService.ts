@@ -39,6 +39,15 @@ import { doRefValidation } from "./refValidation";
 import { nodeUpUntilType } from "./nodeUpUntilType";
 import { findNodesAtLocation } from "./findNodesAtLocation";
 import { SwfJsonPath, SwfLsNode, CodeCompletionStrategy } from "./types";
+import { YAMLValidation } from "yaml-language-server/out/server/src/languageservice/services/yamlValidation";
+import { YAMLSchemaService } from "yaml-language-server/out/server/src/languageservice/services/yamlSchemaService";
+import { Connection, createConnection, ProposedFeatures } from "vscode-languageserver/node";
+// import { Telemetry } from "yaml-language-server/out/server/src/languageserver/telemetry";
+import { getLanguageService as yamlgetLanguageService } from "yaml-language-server";
+
+import { parse as parseYaml } from "yaml-language-server/out/server/src/languageservice/parser/yamlParser07";
+import * as yamlast from "yaml-ast-parser";
+import { TelemetryEvent } from "yaml-language-server/out/server/src/languageserver/telemetry";
 
 export type SwfLanguageServiceConfig = {
   shouldConfigureServiceRegistries: () => boolean; //TODO: See https://issues.redhat.com/browse/KOGITO-7107
@@ -73,8 +82,23 @@ export type SwfLanguageServiceArgs = {
   config: SwfLanguageServiceConfig;
 };
 
+export class Telemetry {
+  constructor(private readonly connection: Connection) {}
+
+  send(event: TelemetryEvent): void {
+    console.error("send:", event);
+  }
+  sendError(name: string, properties: unknown): void {
+    console.error("sendError:", name, properties);
+  }
+  sendTrack(name: string, properties: unknown): void {
+    console.error("sendTrack:", name, properties);
+  }
+}
 export class SwfLanguageService {
   constructor(private readonly args: SwfLanguageServiceArgs) {}
+
+  // private yamlLanguageService: LanguageService
 
   public async getCompletionItems(args: {
     content: string;
@@ -163,8 +187,51 @@ export class SwfLanguageService {
 
     const refValidationResults = doRefValidation({ textDocument, rootNode: args.rootNode });
 
+    //  const workspaceContext = {
+    //     resolveRelativePath: (relativePath: string, resource: string) => {
+    //         return path.join(settings.rootDir, path.dirname(resource), relativePath);
+    //     },
+    // };
+
     if (this.args.lang.fileLanguage === FileLanguage.YAML) {
       //TODO: Include JSON Schema validation for YAML as well. Probably use what the YAML extension uses?
+      // const yamlDocument = parseYaml(args.content);
+      // console.log('yamlfile', yamlDocument)
+      // YamlLS.doValidation
+
+      const workspaceContext = {
+        resolveRelativePath: (relativePath: string, resource: string) => {
+          return posixPath.resolve(resource, relativePath);
+        },
+      };
+      const yamlLanguageService = yamlgetLanguageService(
+        () => Promise.reject("SchemaRequestService not provided!"),
+        workspaceContext,
+        {},
+        [],
+        []
+      );
+      yamlLanguageService.configure({
+        validate: true,
+        hover: true,
+        completion: true,
+        schemas: [{ fileMatch: this.args.lang.fileMatch, uri: SW_SPEC_WORKFLOW_SCHEMA.$id }],
+      });
+      const yamlSchemaService = new YAMLSchemaService(async (uri: any) => {
+        if (uri === SW_SPEC_WORKFLOW_SCHEMA.$id) {
+          return JSON.stringify(SW_SPEC_WORKFLOW_SCHEMA);
+        } else {
+          throw new Error(`Unable to load schema from '${uri}'`);
+        }
+      });
+      const connection = createConnection(ProposedFeatures.all, {});
+      const telemetry = new Telemetry(connection as any);
+      // getLanguageService()
+      const yamlVal = new YAMLValidation(yamlSchemaService, telemetry);
+      const test = yamlVal.doValidation(textDocument, false);
+      //       console.log('test', test)
+      // const yamlLs = yamlGetLaguageService({});
+      // console.log('yaml-test', yamlLs)
       return refValidationResults;
     }
 
