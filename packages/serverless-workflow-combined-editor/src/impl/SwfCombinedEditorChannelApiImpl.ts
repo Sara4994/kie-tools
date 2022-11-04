@@ -44,7 +44,11 @@ import {
   SwfPreviewOptions,
   SwfPreviewOptionsChannelApi,
 } from "../api";
-import { SwfStaticEnvelopeContentProviderChannelApi } from "../api/SwfStaticEnvelopeContentProviderChannelApi";
+import { SwfStaticEnvelopeContentProviderChannelApi } from "../api";
+
+function log(msg: string, args: any = "") {
+  console.log(`SwfCombinedEditorChannelApiImpl ${msg}`, args);
+}
 
 export class SwfCombinedEditorChannelApiImpl implements ServerlessWorkflowCombinedEditorChannelApi {
   constructor(
@@ -137,6 +141,7 @@ export class SwfCombinedEditorChannelApiImpl implements ServerlessWorkflowCombin
     cursorPosition: Position;
     cursorWordRange: Range;
   }): Promise<CompletionItem[]> {
+    log("combined-getCompletionItems", this.swfLanguageServiceChannelApiImpl);
     return this.swfLanguageServiceChannelApiImpl?.kogitoSwfLanguageService__getCompletionItems(args) ?? [];
   }
 
