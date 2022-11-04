@@ -24,7 +24,11 @@ import { extname } from "path";
 
 export type ServerlessWorkflowType = "json" | "yaml";
 
-export function SwfStandaloneEditorPage() {
+interface Props {
+  isDiagramOnlyEditor: boolean;
+}
+
+export const SwfStandaloneEditorPage = (props: Props) => {
   const swfEditorContainer = useRef<HTMLDivElement>(null);
   const unsavedChanges = useRef<HTMLSpanElement>(null);
   const undo = useRef<HTMLButtonElement>(null);
@@ -43,6 +47,7 @@ export function SwfStandaloneEditorPage() {
       initialContent: Promise.resolve(content),
       readOnly: false,
       languageType: extension as any,
+      isDiagramOnly: props.isDiagramOnlyEditor,
     });
 
     setEditor(editorContent);
@@ -55,7 +60,6 @@ export function SwfStandaloneEditorPage() {
       readOnly: false,
       languageType: serverlessWorkflowType,
     });
-
     setEditor(editorContent);
   };
 
@@ -79,7 +83,11 @@ export function SwfStandaloneEditorPage() {
     <Page>
       {!editor && (
         <PageSection isFilled={true}>
-          <ServerlessWorkflowEmptyState newContent={onNewContent} setContent={onSetContent} />
+          <ServerlessWorkflowEmptyState
+            newContent={onNewContent}
+            setContent={onSetContent}
+            isDiagramOnly={props.isDiagramOnlyEditor}
+          />
         </PageSection>
       )}
       <PageSection padding={{ default: "noPadding" }}>
@@ -96,4 +104,4 @@ export function SwfStandaloneEditorPage() {
       </PageSection>
     </Page>
   );
-}
+};

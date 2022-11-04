@@ -65,6 +65,7 @@ interface Props {
   channelType: ChannelType;
   resourcesPathPrefix: string;
   onNewEdit: (edit: WorkspaceEdit) => void;
+  isDiagramOnly: boolean;
 }
 
 export type ServerlessWorkflowCombinedEditorRef = {
@@ -120,10 +121,13 @@ const RefForwardingServerlessWorkflowCombinedEditor: ForwardRefRenderFunction<
 
   const targetOrigin = useMemo(() => (isVscode ? "vscode" : window.location.origin), [isVscode]);
 
-  const isCombinedEditorReady = useMemo(
-    () => isTextEditorReady && isDiagramEditorReady,
-    [isDiagramEditorReady, isTextEditorReady]
-  );
+  const isCombinedEditorReady = useMemo(() => {
+    if (props.isDiagramOnly === true) {
+      return isDiagramEditorReady;
+    } else {
+      return isTextEditorReady && isDiagramEditorReady;
+    }
+  }, [isDiagramEditorReady, isTextEditorReady]);
 
   useEffect(() => {
     if (props.channelType === ChannelType.STANDALONE) {
@@ -404,7 +408,7 @@ const RefForwardingServerlessWorkflowCombinedEditor: ForwardRefRenderFunction<
           }
         >
           <DrawerContentBody>
-            {embeddedTextEditorFile && (
+            {embeddedTextEditorFile && !props.isDiagramOnly && (
               <EmbeddedEditor
                 ref={textEditorRef}
                 file={embeddedTextEditorFile}

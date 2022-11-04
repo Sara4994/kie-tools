@@ -18,7 +18,7 @@ import swfCombinedEditorEnvelopeIndex from "!!raw-loader!../../dist/resources/sw
 import swfDiagramEditorEnvelopeIndex from "!!raw-loader!../../dist/resources/swf/swfDiagramEditorEnvelopeIndex.html";
 import swfMermaidViewerEnvelopeIndex from "!!raw-loader!../../dist/resources/swf/swfMermaidViewerEnvelopeIndex.html";
 import swfTextEditorEnvelopeIndex from "!!raw-loader!../../dist/resources/swf/swfTextEditorEnvelopeIndex.html";
-import { createEditor, Editor, StandaloneEditorApi, ServerlessWorkflowType } from "../common/Editor";
+import { createEditor, Editor, ServerlessWorkflowType, StandaloneEditorApi } from "../common/Editor";
 import { StateControl } from "@kie-tools-core/editor/dist/channel";
 import { EnvelopeServer } from "@kie-tools-core/envelope-bus/dist/channel";
 import { ChannelType, KogitoEditorChannelApi, KogitoEditorEnvelopeApi } from "@kie-tools-core/editor/dist/api";
@@ -26,8 +26,8 @@ import { StandaloneEditorsEditorChannelApiImpl } from "../envelope/StandaloneEdi
 import { ContentType } from "@kie-tools-core/workspace/dist/api";
 import {
   SwfFeatureToggleChannelApiImpl,
-  SwfServiceCatalogChannelApiImpl,
   SwfPreviewOptionsChannelApiImpl,
+  SwfServiceCatalogChannelApiImpl,
   SwfStaticEnvelopeContentProviderChannelApiImpl,
 } from "@kie-tools/serverless-workflow-combined-editor/dist/impl";
 import { MessageBusClientApi } from "@kie-tools-core/envelope-bus/dist/api";
@@ -41,10 +41,15 @@ declare global {
   }
 }
 
-const createEnvelopeServer = (iframe: HTMLIFrameElement, readOnly?: boolean, origin?: string) => {
+const createEnvelopeServer = (
+  iframe: HTMLIFrameElement,
+  isDiagramOnly?: boolean,
+  readOnly?: boolean,
+  origin?: string
+) => {
   const defaultOrigin = window.location.protocol === "file:" ? "*" : window.location.origin;
 
-  return new EnvelopeServer<KogitoEditorChannelApi, KogitoEditorEnvelopeApi>(
+  return new EnvelopeServer<KogitoEditorChannelApi, any>(
     { postMessage: (message) => iframe.contentWindow?.postMessage(message, "*") },
     origin ?? defaultOrigin,
     (self) => {
@@ -59,6 +64,7 @@ const createEnvelopeServer = (iframe: HTMLIFrameElement, readOnly?: boolean, ori
           initialLocale: "en-US",
           isReadOnly: readOnly ?? true,
           channel: ChannelType.STANDALONE,
+          isDiagramOnly,
         }
       );
     }
@@ -73,6 +79,7 @@ export const open = (args: {
   onError?: () => any;
   resources?: Map<string, { contentType: ContentType; content: Promise<string> }>;
   languageType?: ServerlessWorkflowType;
+  isDiagramOnly?: boolean;
 }): StandaloneEditorApi => {
   const iframe = document.createElement("iframe");
   iframe.srcdoc = swfCombinedEditorEnvelopeIndex;
@@ -80,7 +87,7 @@ export const open = (args: {
   iframe.style.height = "100%";
   iframe.style.border = "none";
 
-  const envelopeServer = createEnvelopeServer(iframe, args.readOnly, args.origin);
+  const envelopeServer = createEnvelopeServer(iframe, args.isDiagramOnly, args.readOnly, args.origin);
 
   const stateControl = new StateControl();
 
@@ -117,7 +124,7 @@ export const open = (args: {
       { registries: [] }
     ),
     languageServiceChannelApiImpl,
-    new SwfPreviewOptionsChannelApiImpl(undefined),
+    new SwfPreviewOptionsChannelApiImpl(args.isDiagramOnly ? { diagramDefaultWidth: "100%" } : undefined),
     new SwfStaticEnvelopeContentProviderChannelApiImpl({
       diagramEditorEnvelopeContent: swfDiagramEditorEnvelopeIndex,
       mermaidEnvelopeContent: swfMermaidViewerEnvelopeIndex,

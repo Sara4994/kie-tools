@@ -45,6 +45,7 @@ enum Location {
   PING_PONG_MIXED_PAGES = "/page/ping-pong-mixed",
   DMN_STANDALONE_EDITOR = "/page/dmn-standalone-editor",
   SWF_STANDALONE_EDITOR = "/page/swf-standalone-editor",
+  SWF_STANDALONE_EDITOR_DIAGRAM_ONLY = "/page/swf-standalone-editor-diagram-only",
   HOME = "/",
 }
 
@@ -127,6 +128,12 @@ export function App() {
                   >
                     <Link to={Location.SWF_STANDALONE_EDITOR}>SWF Standalone Editor</Link>
                   </NavItem>
+                  <NavItem
+                    itemId={Location.SWF_STANDALONE_EDITOR_DIAGRAM_ONLY}
+                    isActive={location === Location.SWF_STANDALONE_EDITOR_DIAGRAM_ONLY}
+                  >
+                    <Link to={Location.SWF_STANDALONE_EDITOR_DIAGRAM_ONLY}>SWF Standalone Editor - Diagram only</Link>
+                  </NavItem>
                 </NavList>
               </Nav>
             }
@@ -168,7 +175,10 @@ export function App() {
             <DmnStandaloneEditorPage />
           </Route>
           <Route path={Location.SWF_STANDALONE_EDITOR}>
-            <SwfStandaloneEditorPage />
+            <SwfStandaloneEditorPage isDiagramOnlyEditor={false} />
+          </Route>
+          <Route path={Location.SWF_STANDALONE_EDITOR_DIAGRAM_ONLY}>
+            <SwfStandaloneEditorPage isDiagramOnlyEditor={true} />
           </Route>
         </Switch>
       </Page>

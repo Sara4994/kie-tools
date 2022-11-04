@@ -36,7 +36,7 @@ import { Notification } from "@kie-tools-core/notifications/dist/api";
 export class StandaloneEditorsEditorChannelApiImpl implements KogitoEditorChannelApi {
   constructor(
     private readonly stateControl: StateControl,
-    private readonly file: EmbeddedEditorFile,
+    private readonly file: any,
     private readonly locale: string,
     private readonly overrides: Partial<KogitoEditorChannelApi>,
     private readonly resources?: Map<string, { contentType: ContentType; content: Promise<string> }>
